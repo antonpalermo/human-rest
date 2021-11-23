@@ -11,10 +11,6 @@ const main = async () => {
   app.use(express.json())
   app.use(morgan('common'))
 
-  app.get('/', (_, res) => {
-    res.status(200).send({ status: 'good' })
-  })
-
   const apollo = new ApolloServer({
     schema: await buildSchema({
       resolvers: [`${__dirname}/resolvers/**/*.ts`],
@@ -27,7 +23,7 @@ const main = async () => {
 
   console.log('applying apollo middleware...')
 
-  apollo.applyMiddleware({ app })
+  apollo.applyMiddleware({ app, path: '/' })
 
   app.listen(port, () => console.log('server running...'))
 }

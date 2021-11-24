@@ -1,8 +1,10 @@
+import 'dotenv/config'
 import 'reflect-metadata'
 import morgan from 'morgan'
 import express from 'express'
 import { buildSchema } from 'type-graphql'
 import { ApolloServer } from 'apollo-server-express'
+import { createConnection } from 'typeorm'
 
 const main = async () => {
   const app = express()
@@ -16,6 +18,10 @@ const main = async () => {
       resolvers: [`${__dirname}/resolvers/**/*.ts`],
     }),
   })
+
+  console.log('initializing database...')
+
+  await createConnection()
 
   console.log('starting apollo server...')
 

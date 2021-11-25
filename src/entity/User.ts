@@ -1,15 +1,17 @@
 import {
   BaseEntity,
-  BeforeInsert,
   Column,
+  CreateDateColumn,
   Entity,
+  Generated,
   PrimaryColumn,
+  UpdateDateColumn,
 } from 'typeorm'
-import { v4 as uuid } from 'uuid'
 
 @Entity({ name: 'users' })
 class User extends BaseEntity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn({ type: 'uuid' })
+  @Generated('uuid')
   id?: string
 
   @Column({ type: 'varchar', length: 150 })
@@ -24,17 +26,11 @@ class User extends BaseEntity {
   @Column({ type: 'text' })
   password: string
 
-  @Column({ type: 'timestamptz' })
+  @CreateDateColumn({ type: 'timestamptz' })
   dateCreated?: Date
 
-  @Column({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   dateUpdated?: Date
-
-  @BeforeInsert()
-  parseUserId() {
-    // use uuid then remove the "-" sign
-    this.id = uuid().replace(/-/g, '')
-  }
 }
 
 export default User

@@ -17,6 +17,7 @@ const main = async () => {
     schema: await buildSchema({
       resolvers: [`${__dirname}/resolvers/**/*.ts`],
     }),
+    introspection: true,
   })
 
   console.log('initializing database...')

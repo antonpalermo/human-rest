@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import 'reflect-metadata'
+import cors from 'cors'
 import morgan from 'morgan'
 import express from 'express'
 import { buildSchema } from 'type-graphql'
@@ -12,6 +13,7 @@ const main = async () => {
 
   app.use(express.json())
   app.use(morgan('common'))
+  app.use(cors({ origin: process.env.HOST, credentials: true }))
 
   const apollo = new ApolloServer({
     schema: await buildSchema({

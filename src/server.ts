@@ -32,7 +32,7 @@ const main = async () => {
 
   console.log('applying apollo middleware...')
 
-  apollo.applyMiddleware({ app, path: '/' })
+  apollo.applyMiddleware({ app, path: '/', cors: false })
 
   app.listen(port, () => console.log('server running...'))
 }

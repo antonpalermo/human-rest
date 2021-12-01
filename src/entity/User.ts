@@ -26,10 +26,10 @@ class User extends BaseEntity {
   @Column({ type: 'text' })
   password: string
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @CreateDateColumn({ type: 'timestamp' })
   dateCreated?: Date
 
-  @UpdateDateColumn({ type: 'timestamptz' })
+  @UpdateDateColumn({ type: 'timestamp' })
   dateUpdated?: Date
 }
 

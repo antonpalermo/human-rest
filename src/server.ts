@@ -2,7 +2,7 @@ import 'dotenv/config'
 import 'reflect-metadata'
 import cors from 'cors'
 import morgan from 'morgan'
-import express from 'express'
+import express, { Request, Response } from 'express'
 import { buildSchema } from 'type-graphql'
 import { ApolloServer } from 'apollo-server-express'
 import { createConnection } from 'typeorm'
@@ -18,7 +18,9 @@ const main = async () => {
   const apollo = new ApolloServer({
     schema: await buildSchema({
       resolvers: [`${__dirname}/resolvers/**/*.ts`],
+      dateScalarMode: 'timestamp',
     }),
+    context: (req: Request, res: Response) => ({ req, res }),
     introspection: true,
   })
 

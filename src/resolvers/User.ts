@@ -24,7 +24,10 @@ class UserData {
 class UserResolver {
   @Query(() => [UserSchema])
   async users(): Promise<UserSchema[]> {
-    return await getRepository(User).createQueryBuilder('user').getMany()
+    return await getRepository(User)
+      .createQueryBuilder('user')
+      .cache(1000 * 60 * 30)
+      .getMany()
   }
 
   @Query(() => UserSchema, { nullable: true })
@@ -33,6 +36,7 @@ class UserResolver {
       .createQueryBuilder('user')
       .select()
       .where('id = :id', { id })
+      .cache(1000 * 60 * 30)
       .getOneOrFail()
   }
 

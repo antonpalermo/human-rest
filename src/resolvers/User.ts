@@ -3,6 +3,8 @@ import { Arg, Field, InputType, Mutation, Query, Resolver } from 'type-graphql'
 import { getRepository } from 'typeorm'
 import UserSchema from '../schema/UserSchema'
 
+import { hash } from 'argon2'
+
 @InputType()
 class UserData {
   @Field(() => String, { nullable: true })
@@ -41,7 +43,7 @@ class UserResolver {
         .createQueryBuilder('users')
         .insert()
         .into('users')
-        .values({ ...user })
+        .values({ ...user, password: await hash(user.password) })
         .returning('*')
         .execute()
     ).raw[0]

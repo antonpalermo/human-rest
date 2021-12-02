@@ -1,4 +1,5 @@
 import { Field, ObjectType } from 'type-graphql'
+import { DateTimeResolver } from 'graphql-scalars'
 
 @ObjectType()
 class User {
@@ -14,10 +15,10 @@ class User {
   @Field()
   email: string
 
-  @Field()
+  @Field(() => DateTimeResolver)
   dateCreated?: Date
 
-  @Field()
+  @Field(() => DateTimeResolver)
   dateUpdated?: Date
 }
 

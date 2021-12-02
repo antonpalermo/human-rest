@@ -1,9 +1,19 @@
 import User from '../entity/User'
-import { Arg, Field, InputType, Mutation, Query, Resolver } from 'type-graphql'
+import {
+  Arg,
+  Ctx,
+  Field,
+  InputType,
+  Mutation,
+  Query,
+  Resolver,
+} from 'type-graphql'
 import { getRepository } from 'typeorm'
 import UserSchema from '../schema/UserSchema'
 
 import { hash } from 'argon2'
+import { MainContext } from '../modules'
+import { __rdsUserKey } from '../constants'
 
 @InputType()
 class UserData {
@@ -23,11 +33,9 @@ class UserData {
 @Resolver(() => UserSchema)
 class UserResolver {
   @Query(() => [UserSchema])
-  async users(): Promise<UserSchema[]> {
-    return await getRepository(User)
-      .createQueryBuilder('user')
-      .cache(1000 * 60 * 30)
-      .getMany()
+  async users(@Ctx() { redis }: MainContext): Promise<UserSchema[]> {
+    const list = (await redis.lrange(__rdsUserKey, 0, -1)) || []
+    return list.map((x) => JSON.parse(x))
   }
 
   @Query(() => UserSchema, { nullable: true })

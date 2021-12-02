@@ -14,7 +14,7 @@ module.exports = {
     options: {
       port: process.env.APP_RDS_PORT,
       host: process.env.APP_RDS_HOST,
-      password: process.env.APP_RDS_PASSWORD,
+      password: process.env.APP_RDS_PASS,
     },
   },
   entities: ['src/entity/**/*.ts'],

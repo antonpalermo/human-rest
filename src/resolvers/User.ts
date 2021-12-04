@@ -52,16 +52,30 @@ class UserResolver {
   }
 
   @Mutation(() => UserSchema)
-  async create(@Arg('user') user: UserData): Promise<UserSchema> {
-    return (
-      await getRepository(User)
-        .createQueryBuilder('users')
-        .insert()
-        .into('users')
-        .values({ ...user, password: await hash(user.password) })
-        .returning('*')
-        .execute()
-    ).raw[0]
+  async create(
+    @Arg('user') user: UserData,
+    @Ctx() { redis }: MainContext
+  ): Promise<UserSchema> {
+    const {
+      raw: [createdUser],
+    } = await getRepository(User)
+      .createQueryBuilder('user')
+      .insert()
+      .into('users')
+      .values({ ...user, password: await hash(user.password) })
+      .returning([
+        'id',
+        'firstname',
+        'lastname',
+        'email',
+        'dateCreated',
+        'dateUpdated',
+      ])
+      .execute()
+
+    await redis.lpush(__rdsUserKey, JSON.stringify(createdUser))
+
+    return createdUser
   }
 
   @Mutation(() => UserSchema)

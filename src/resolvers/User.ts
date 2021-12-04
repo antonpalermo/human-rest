@@ -39,13 +39,16 @@ class UserResolver {
   }
 
   @Query(() => UserSchema, { nullable: true })
-  async user(@Arg('id') id: string): Promise<UserSchema> {
-    return await getRepository(User)
-      .createQueryBuilder('user')
-      .select()
-      .where('id = :id', { id })
-      .cache(1000 * 60 * 30)
-      .getOneOrFail()
+  async user(
+    @Arg('id') id: string,
+    @Ctx() { redis }: MainContext
+  ): Promise<UserSchema> {
+    // get the list
+    const list = (await redis.lrange(__rdsUserKey, 0, -1)) || []
+    // convert the list to array
+    const data = list.map((x) => JSON.parse(x))
+    // return the queried user.
+    return data.find((x) => x.id === id)
   }
 
   @Mutation(() => UserSchema)
@@ -64,29 +67,61 @@ class UserResolver {
   @Mutation(() => UserSchema)
   async update(
     @Arg('id') id: string,
-    @Arg('user') user: UserData
+    @Arg('user') user: UserData,
+    @Ctx() { redis }: MainContext
   ): Promise<UserSchema> {
-    return (
-      await getRepository(User)
-        .createQueryBuilder()
-        .update()
-        .where('id = :id', { id })
-        .set({ ...user })
-        .returning('*')
-        .execute()
-    ).raw[0]
+    const {
+      raw: [updatedUser],
+    } = await getRepository(User)
+      .createQueryBuilder('user')
+      .update()
+      .where('id = :id', { id })
+      .set({ ...user })
+      .returning([
+        'id',
+        'firstname',
+        'lastname',
+        'email',
+        'dateCreated',
+        'dateUpdated',
+      ])
+      .execute()
+
+    console.log(updatedUser)
+
+    const list = (await redis.lrange(__rdsUserKey, 0, -1)) || []
+    const index = list.findIndex((x: string) => JSON.parse(x).id === id)
+    console.log(index)
+    await redis.lset(__rdsUserKey, index, JSON.stringify(updatedUser))
+
+    return updatedUser
   }
 
   @Mutation(() => UserSchema)
-  async delete(@Arg('id') id: string): Promise<UserSchema> {
-    return (
-      await getRepository(User)
-        .createQueryBuilder('users')
-        .delete()
-        .where('id = :id', { id })
-        .returning('*')
-        .execute()
-    ).raw[0]
+  async delete(
+    @Arg('id') id: string,
+    @Ctx() { redis }: MainContext
+  ): Promise<UserSchema> {
+    const {
+      raw: [deletedUser],
+    } = await getRepository(User)
+      .createQueryBuilder('user')
+      .delete()
+      .where('id = :id', { id })
+      .returning([
+        'id',
+        'firstname',
+        'lastname',
+        'email',
+        'dateCreated',
+        'dateUpdated',
+      ])
+      .execute()
+
+    const list = (await redis.lrange(__rdsUserKey, 0, -1)) || []
+    const index = list.findIndex((x: string) => JSON.parse(x).id === id)
+    await redis.lrem(__rdsUserKey, index, JSON.stringify(deletedUser))
+    return deletedUser
   }
 }
 

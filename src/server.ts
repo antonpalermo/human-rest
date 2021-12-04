@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import 'reflect-metadata'
-import cors from 'cors'
+// import cors from 'cors'
 import morgan from 'morgan'
 import express, { Request, Response } from 'express'
 import Redis from 'ioredis'
@@ -22,7 +22,7 @@ const main = async () => {
 
   app.use(express.json())
   app.use(morgan('common'))
-  app.use(cors({ origin: process.env.HOST, credentials: true }))
+  // app.use(cors({ origin: process.env.HOST, credentials: true }))
 
   const apollo = new ApolloServer({
     schema: await buildSchema({
@@ -66,7 +66,7 @@ const main = async () => {
 
   console.log('applying apollo middleware...')
 
-  apollo.applyMiddleware({ app, path: '/', cors: false })
+  apollo.applyMiddleware({ app, path: '/' /* cors: false */ })
 
   app.listen(port, () => console.log('server running...'))
 }
